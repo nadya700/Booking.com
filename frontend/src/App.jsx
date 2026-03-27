@@ -306,8 +306,12 @@ function App() {
         }),
       })
 
+      const propertyTitle =
+        payload?.property?.title || roomDetails?.title || 'your selected property'
+      const totalPrice = payload?.total_price ?? 'N/A'
+
       setSuccess(
-        `Reservation confirmed for ${payload.property.title}. Total: $${payload.total_price}. You can pay in the reservations section.`
+        `Reservation confirmed for ${propertyTitle}. Total: $${totalPrice}. You can pay in the reservations section.`
       )
       const newBookings = await apiRequest('/api/bookings')
       setBookings(newBookings)
@@ -349,8 +353,28 @@ function App() {
 
       localStorage.setItem('token', payload.token)
       setToken(payload.token)
-      setUser(payload.user)
-      setSuccess(`Welcome, ${payload.user.name}`)
+
+      let nextUser = payload.user
+
+      // Some API responses may return token without embedding the user object.
+      if (!nextUser && payload.token) {
+        const meResponse = await fetch('/api/me', {
+          headers: {
+            Authorization: `Bearer ${payload.token}`,
+          },
+        })
+
+        if (meResponse.ok) {
+          nextUser = await meResponse.json()
+        }
+      }
+
+      if (!nextUser) {
+        throw new Error('Login succeeded but profile data was not returned.')
+      }
+
+      setUser(nextUser)
+      setSuccess(`Welcome, ${nextUser.name || nextUser.email || 'User'}`)
     } catch (requestError) {
       setError(requestError.message)
     }
