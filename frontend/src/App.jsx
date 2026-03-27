@@ -89,10 +89,30 @@ function App() {
     }
 
     const response = await fetch(url, { ...options, headers })
-    const payload = await response.json().catch(() => ({}))
+    const rawBody = await response.text()
+    let payload = {}
+
+    if (rawBody) {
+      try {
+        payload = JSON.parse(rawBody)
+      } catch {
+        const objectStart = rawBody.indexOf('{')
+        const objectEnd = rawBody.lastIndexOf('}')
+
+        if (objectStart !== -1 && objectEnd > objectStart) {
+          try {
+            payload = JSON.parse(rawBody.slice(objectStart, objectEnd + 1))
+          } catch {
+            payload = {}
+          }
+        }
+      }
+    }
 
     if (!response.ok) {
-      const firstError = payload.message || Object.values(payload.errors || {})[0]?.[0]
+      const firstError = payload.message
+        || Object.values(payload.errors || {})[0]?.[0]
+        || rawBody.slice(0, 180)
       throw new Error(firstError || 'Request failed')
     }
 
@@ -351,17 +371,33 @@ function App() {
         body: JSON.stringify(authForm),
       })
 
-      localStorage.setItem('token', payload.token)
-      setToken(payload.token)
+      const nextToken = payload?.token
+        || payload?.data?.token
+        || payload?.access_token
+        || payload?.data?.access_token
+        || null
 
-      let nextUser = payload.user
+      if (nextToken) {
+        localStorage.setItem('token', nextToken)
+        setToken(nextToken)
+      } else {
+        // Allow session/cookie based auth responses that don't return explicit API tokens.
+        localStorage.removeItem('token')
+        setToken('')
+      }
 
-      // Some API responses may return token without embedding the user object.
-      if (!nextUser && payload.token) {
+      let nextUser = payload?.user
+        || payload?.data?.user
+        || payload?.profile
+        || payload?.data?.profile
+        || null
+
+      // Some responses may include token first and user profile arrives via /api/me.
+      if (!nextUser) {
         const meResponse = await fetch('/api/me', {
-          headers: {
-            Authorization: `Bearer ${payload.token}`,
-          },
+          headers: nextToken
+            ? { Authorization: `Bearer ${nextToken}` }
+            : undefined,
         })
 
         if (meResponse.ok) {
@@ -369,12 +405,17 @@ function App() {
         }
       }
 
-      if (!nextUser) {
-        throw new Error('Login succeeded but profile data was not returned.')
+      if (!nextToken && !nextUser) {
+        throw new Error('Login response did not include token or user profile.')
       }
 
-      setUser(nextUser)
-      setSuccess(`Welcome, ${nextUser.name || nextUser.email || 'User'}`)
+      // Do not fail login UI if profile resolution is delayed.
+      if (nextUser) {
+        setUser(nextUser)
+        setSuccess(`Welcome, ${nextUser.name || nextUser.email || 'User'}`)
+      } else {
+        setSuccess('Login successful. Loading your profile...')
+      }
     } catch (requestError) {
       setError(requestError.message)
     }
