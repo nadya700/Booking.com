@@ -45,6 +45,11 @@ const formatPaymentMethod = (method) => {
   return option ? option.label : method
 }
 
+const formatStayDate = (value) => {
+  if (!value) return ''
+  return String(value).split('T')[0]
+}
+
 function App() {
   const [authMode, setAuthMode] = useState('login')
   const [authForm, setAuthForm] = useState({ name: '', email: '', password: '' })
@@ -83,12 +88,18 @@ function App() {
   const apiRequest = useCallback(async (url, options = {}) => {
     const hasFormData = options.body instanceof FormData
     const headers = {
+      Accept: 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
       ...(hasFormData ? {} : { 'Content-Type': 'application/json' }),
       ...(options.headers || {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     }
 
-    const response = await fetch(url, { ...options, headers })
+    const response = await fetch(url, {
+      credentials: 'include',
+      ...options,
+      headers,
+    })
     const rawBody = await response.text()
     let payload = {}
 
@@ -395,9 +406,17 @@ function App() {
       // Some responses may include token first and user profile arrives via /api/me.
       if (!nextUser) {
         const meResponse = await fetch('/api/me', {
+          credentials: 'include',
           headers: nextToken
-            ? { Authorization: `Bearer ${nextToken}` }
-            : undefined,
+            ? {
+              Accept: 'application/json',
+              'X-Requested-With': 'XMLHttpRequest',
+              Authorization: `Bearer ${nextToken}`,
+            }
+            : {
+              Accept: 'application/json',
+              'X-Requested-With': 'XMLHttpRequest',
+            },
         })
 
         if (meResponse.ok) {
@@ -406,7 +425,11 @@ function App() {
       }
 
       if (!nextToken && !nextUser) {
-        throw new Error('Login response did not include token or user profile.')
+        const debugPreview = JSON.stringify(payload || {}).slice(0, 220)
+        throw new Error(
+          payload?.message
+            || `Login response did not include token or user profile. Payload: ${debugPreview}`
+        )
       }
 
       // Do not fail login UI if profile resolution is delayed.
@@ -598,7 +621,7 @@ function App() {
                   </span>
                 </div>
                 <small>
-                  {item.check_in} to {item.check_out} • ${item.total_price}
+                  {formatStayDate(item.check_in)} to {formatStayDate(item.check_out)} • ${item.total_price}
                 </small>
                 {isPaid ? (
                   <small>
