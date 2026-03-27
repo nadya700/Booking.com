@@ -21,6 +21,12 @@ class Property extends Model
         'price_per_night',
         'max_guests',
         'free_cancellation',
+        'breakfast_included',
+        'pet_friendly',
+        'wifi_included',
+        'parking_included',
+        'room_size_sqm',
+        'bed_type',
         'description',
     ];
 
@@ -28,7 +34,12 @@ class Property extends Model
     {
         return [
             'free_cancellation' => 'boolean',
+            'breakfast_included' => 'boolean',
+            'pet_friendly' => 'boolean',
+            'wifi_included' => 'boolean',
+            'parking_included' => 'boolean',
             'rating' => 'float',
+            'room_size_sqm' => 'integer',
         ];
     }
 

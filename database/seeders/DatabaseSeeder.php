@@ -18,7 +18,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $properties = Property::factory()->count(14)->create();
+        $hotelProperties = Property::factory()
+            ->count(50)
+            ->state(['type' => 'Hotel'])
+            ->create();
+        $airbnbProperties = Property::factory()
+            ->count(50)
+            ->state(['type' => 'Airbnb'])
+            ->create();
+        $properties = $hotelProperties->concat($airbnbProperties);
+
         $admin = User::factory()->create([
             'name' => 'Admin User',
             'email' => 'admin@hotel.local',
@@ -31,7 +40,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'guest',
         ]);
 
-        Booking::factory()->count(6)->recycle($properties)->create([
+        Booking::factory()->count(18)->recycle($properties)->create([
             'user_id' => $guest->id,
         ]);
 

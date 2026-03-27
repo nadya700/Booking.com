@@ -1,1 +1,16 @@
-# Ignore n
+# Ignore node_modules folder
+node_modules/
+
+# Ignore environment variable files
+.env
+
+# Ignore database files
+*.sqlite
+*.sqlite3
+
+# Ignore log files
+*.log
+
+# Ignore system files
+.DS_Store
+Thumbs.db

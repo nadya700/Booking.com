@@ -36,7 +36,7 @@ class PropertyController extends Controller
 
     public function show(Property $property)
     {
-        return response()->json($property->load('bookings'));
+        return response()->json($property);
     }
 
     public function availability(Request $request, Property $property)
@@ -95,6 +95,12 @@ class PropertyController extends Controller
             'price_per_night' => ['required', 'integer', 'min:1'],
             'max_guests' => ['required', 'integer', 'min:1'],
             'free_cancellation' => ['required', 'boolean'],
+            'breakfast_included' => ['required', 'boolean'],
+            'pet_friendly' => ['required', 'boolean'],
+            'wifi_included' => ['required', 'boolean'],
+            'parking_included' => ['required', 'boolean'],
+            'room_size_sqm' => ['required', 'integer', 'min:10', 'max:250'],
+            'bed_type' => ['required', 'string', 'max:80'],
             'description' => ['required', 'string'],
         ]);
 
@@ -114,6 +120,12 @@ class PropertyController extends Controller
             'price_per_night' => ['sometimes', 'integer', 'min:1'],
             'max_guests' => ['sometimes', 'integer', 'min:1'],
             'free_cancellation' => ['sometimes', 'boolean'],
+            'breakfast_included' => ['sometimes', 'boolean'],
+            'pet_friendly' => ['sometimes', 'boolean'],
+            'wifi_included' => ['sometimes', 'boolean'],
+            'parking_included' => ['sometimes', 'boolean'],
+            'room_size_sqm' => ['sometimes', 'integer', 'min:10', 'max:250'],
+            'bed_type' => ['sometimes', 'string', 'max:80'],
             'description' => ['sometimes', 'string'],
         ]);
 

@@ -20,6 +20,9 @@ class Booking extends Model
         'guests',
         'total_price',
         'status',
+        'payment_status',
+        'payment_method',
+        'paid_at',
     ];
 
     protected function casts(): array
@@ -27,6 +30,7 @@ class Booking extends Model
         return [
             'check_in' => 'date',
             'check_out' => 'date',
+            'paid_at' => 'datetime',
         ];
     }
 

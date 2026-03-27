@@ -9,6 +9,7 @@ use App\Models\Property;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class BookingController extends Controller
@@ -59,10 +60,36 @@ class BookingController extends Controller
             'user_id' => $request->user()->id,
             'total_price' => $totalPrice,
             'status' => 'confirmed',
+            'payment_status' => 'unpaid',
         ]);
 
         Mail::to($booking->guest_email)->send(new BookingConfirmedMail($booking->load('property')));
 
         return response()->json($booking->load('property'), 201);
+    }
+
+    public function pay(Request $request, Booking $booking)
+    {
+        if ((int) $booking->user_id !== (int) $request->user()->id) {
+            return response()->json(['message' => 'You are not allowed to pay this booking.'], 403);
+        }
+
+        $validated = $request->validate([
+            'payment_method' => [
+                'required',
+                'string',
+                Rule::in(['credit_card', 'debit_card', 'bank_transfer', 'paypal']),
+            ],
+        ]);
+
+        if ($booking->payment_status !== 'paid') {
+            $booking->update([
+                'payment_status' => 'paid',
+                'payment_method' => $validated['payment_method'],
+                'paid_at' => now(),
+            ]);
+        }
+
+        return response()->json($booking->load('property'));
     }
 }

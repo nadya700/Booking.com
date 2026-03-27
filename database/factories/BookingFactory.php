@@ -21,6 +21,7 @@ class BookingFactory extends Factory
     {
         $checkIn = fake()->dateTimeBetween('+1 days', '+1 month');
         $checkOut = fake()->dateTimeBetween($checkIn->format('Y-m-d').' +1 day', $checkIn->format('Y-m-d').' +8 days');
+        $paymentStatus = fake()->randomElement(['unpaid', 'paid']);
 
         return [
             'user_id' => User::factory(),
@@ -32,6 +33,11 @@ class BookingFactory extends Factory
             'guests' => fake()->numberBetween(1, 4),
             'total_price' => fake()->numberBetween(100, 1900),
             'status' => fake()->randomElement(['confirmed', 'pending']),
+            'payment_status' => $paymentStatus,
+            'payment_method' => $paymentStatus === 'paid'
+                ? fake()->randomElement(['credit_card', 'debit_card', 'bank_transfer', 'paypal'])
+                : null,
+            'paid_at' => $paymentStatus === 'paid' ? fake()->dateTimeBetween('-1 month', 'now') : null,
         ];
     }
 }

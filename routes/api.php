@@ -21,6 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:guest')->group(function () {
         Route::get('/bookings', [BookingController::class, 'index']);
         Route::post('/bookings', [BookingController::class, 'store']);
+        Route::post('/bookings/{booking}/pay', [BookingController::class, 'pay']);
         Route::get('/favorites', [FavoriteController::class, 'index']);
         Route::post('/favorites', [FavoriteController::class, 'store']);
         Route::delete('/favorites/{property}', [FavoriteController::class, 'destroy']);

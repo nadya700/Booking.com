@@ -15,6 +15,7 @@
         <li><strong>Check-out:</strong> {{ $booking->check_out->toDateString() }}</li>
         <li><strong>Guests:</strong> {{ $booking->guests }}</li>
         <li><strong>Total:</strong> ${{ $booking->total_price }}</li>
+        <li><strong>Payment status:</strong> {{ ucfirst($booking->payment_status ?? 'unpaid') }}</li>
     </ul>
     <p>Thank you for booking with us.</p>
 </body>

@@ -53,6 +53,7 @@
 
 .search-bar input,
 .booking-form input,
+.booking-form select,
 .booking-form textarea,
 .booking-form button {
   border: 1px solid #d9d9d9;
@@ -138,6 +139,16 @@
   font-size: 0.9rem;
 }
 
+.checkbox-row {
+  display: flex !important;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-row input {
+  width: auto;
+}
+
 .booking-form button {
   background: #006ce4;
   color: #fff;
@@ -184,6 +195,67 @@
   padding-left: 1rem;
 }
 
+.reservation-panel {
+  border-top: 1px solid #e6ebf2;
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+.reservation-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.reservation-item {
+  border: 1px solid #dfe3ea;
+  border-radius: 10px;
+  padding: 0.65rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.reservation-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.payment-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.payment-badge.paid {
+  background: #e8f6ef;
+  color: #0b5f37;
+}
+
+.payment-badge.unpaid {
+  background: #fff4d6;
+  color: #815700;
+}
+
+.pay-controls {
+  display: grid;
+  gap: 0.45rem;
+  grid-template-columns: 1fr auto;
+}
+
+.pay-controls select {
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  padding: 0.5rem;
+  background: #fff;
+}
+
 .hint {
   color: #5d6b82;
   font-size: 0.88rem;
@@ -201,6 +273,88 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
+}
+
+.amenity-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+
+.amenity-inline span {
+  background: #f2f7ff;
+  color: #19488f;
+  border-radius: 999px;
+  padding: 0.18rem 0.5rem;
+  font-size: 0.76rem;
+}
+
+.room-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.back-button {
+  border: 1px solid #c9daf7;
+  background: #fff;
+  color: #003b95;
+  border-radius: 8px;
+  padding: 0.45rem 0.7rem;
+  cursor: pointer;
+}
+
+.room-layout {
+  align-items: start;
+}
+
+.room-detail-card {
+  border: 1px solid #dfe3ea;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.room-detail-card img {
+  width: 100%;
+  height: 360px;
+  object-fit: cover;
+}
+
+.room-detail-content {
+  padding: 1rem;
+}
+
+.room-spec-grid {
+  margin-top: 0.8rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.amenity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-top: 0.6rem;
+}
+
+.amenity-grid span {
+  background: #f4f7fb;
+  border: 1px solid #e4eaf3;
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+  font-size: 0.86rem;
+}
+
+.availability-block {
+  border: 1px solid #dfe3ea;
+  border-radius: 12px;
+  background: #fff;
+  padding: 0.9rem;
 }
 
 .day-pill {
@@ -254,5 +408,18 @@
 
   .card-body {
     padding: 1rem;
+  }
+
+  .room-spec-grid,
+  .amenity-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pay-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .room-detail-card img {
+    height: 240px;
   }
 }
