@@ -41,6 +41,28 @@
   cursor: pointer;
 }
 
+.admin-nav {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.admin-nav button {
+  border: 1px solid #9fc0f9;
+  background: #fff;
+  color: #003b95;
+  border-radius: 999px;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+}
+
+.admin-nav button.active {
+  background: #006ce4;
+  border-color: #006ce4;
+  color: #fff;
+}
+
 .search-bar {
   margin-top: 1.25rem;
   background: #febb02;
@@ -68,6 +90,50 @@
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 1rem;
+}
+
+.admin-layout {
+  width: min(1200px, 95%);
+  margin: 1.5rem auto;
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-page {
+  border: 1px solid #dfe3ea;
+  border-radius: 12px;
+  background: #fff;
+  padding: 1rem;
+}
+
+.admin-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.admin-page-header button,
+.admin-sidebar-note button {
+  border: 1px solid #006ce4;
+  background: #006ce4;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+}
+
+.admin-search-bar {
+  margin-bottom: 1rem;
+}
+
+.admin-results {
+  margin-top: 0.5rem;
+}
+
+.admin-form {
+  max-width: 780px;
 }
 
 .results {
@@ -269,6 +335,10 @@
   margin-bottom: 0.75rem;
 }
 
+.admin-kpis-wide {
+  max-width: 720px;
+}
+
 .availability-grid {
   display: flex;
   flex-wrap: wrap;
@@ -357,6 +427,11 @@
   padding: 0.9rem;
 }
 
+.admin-sidebar-note {
+  display: grid;
+  gap: 0.65rem;
+}
+
 .day-pill {
   display: inline-block;
   padding: 0.25rem 0.4rem;
@@ -400,6 +475,10 @@
 
   .search-bar {
     grid-template-columns: 1fr;
+  }
+
+  .admin-nav {
+    flex-direction: column;
   }
 
   .card {

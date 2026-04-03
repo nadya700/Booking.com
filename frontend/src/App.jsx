@@ -28,14 +28,29 @@ const initialPropertyForm = {
   description: '',
 }
 
-const parseRoomIdFromHash = () => {
-  const hash = window.location.hash.replace('#', '')
-  const match = hash.match(/^\/rooms\/(\d+)$/)
+const adminPageConfig = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'properties', label: 'Properties' },
+  { id: 'editor', label: 'Room editor' },
+]
+
+const getHashPath = () => window.location.hash.replace('#', '') || '/'
+
+const parseRoomIdFromHash = (hashPath = getHashPath()) => {
+  const match = hashPath.match(/^\/rooms\/(\d+)$/)
 
   if (!match) return null
 
   const id = Number(match[1])
   return Number.isFinite(id) ? id : null
+}
+
+const parseAdminPageFromHash = (hashPath = getHashPath()) => {
+  const match = hashPath.match(/^\/admin(?:\/([a-z-]+))?$/)
+  if (!match) return null
+
+  const page = match[1] || 'overview'
+  return adminPageConfig.some((item) => item.id === page) ? page : 'overview'
 }
 
 const formatPaymentMethod = (method) => {
@@ -63,6 +78,7 @@ function App() {
   const [availability, setAvailability] = useState([])
   const [availabilityLoading, setAvailabilityLoading] = useState(false)
   const [activeRoomId, setActiveRoomId] = useState(() => parseRoomIdFromHash())
+  const [adminPage, setAdminPage] = useState(() => parseAdminPageFromHash())
   const [roomDetails, setRoomDetails] = useState(null)
   const [roomLoading, setRoomLoading] = useState(false)
   const [propertyForm, setPropertyForm] = useState(initialPropertyForm)
@@ -147,7 +163,9 @@ function App() {
 
   useEffect(() => {
     const onHashChange = () => {
-      setActiveRoomId(parseRoomIdFromHash())
+      const hashPath = getHashPath()
+      setActiveRoomId(parseRoomIdFromHash(hashPath))
+      setAdminPage(parseAdminPageFromHash(hashPath))
       setSuccess('')
       setError('')
     }
@@ -306,12 +324,24 @@ function App() {
     loadAnalytics()
   }, [user, apiRequest])
 
+  useEffect(() => {
+    if (!user) return
+
+    if (user.role !== 'admin' && adminPage) {
+      window.location.hash = '/'
+    }
+  }, [user, adminPage])
+
   const openRoomDetails = (propertyId) => {
     window.location.hash = `/rooms/${propertyId}`
   }
 
   const returnToListing = () => {
     window.location.hash = '/'
+  }
+
+  const goToAdminPage = (pageId) => {
+    window.location.hash = `/admin/${pageId}`
   }
 
   const handleBooking = async (event) => {
@@ -436,6 +466,9 @@ function App() {
       if (nextUser) {
         setUser(nextUser)
         setSuccess(`Welcome, ${nextUser.name || nextUser.email || 'User'}`)
+        if (nextUser.role === 'admin') {
+          window.location.hash = '/admin/overview'
+        }
       } else {
         setSuccess('Login successful. Loading your profile...')
       }
@@ -456,6 +489,7 @@ function App() {
     setFavorites([])
     setBookings([])
     setPaymentMethodByBooking({})
+    window.location.hash = '/'
   }
 
   const toggleFavorite = async (propertyId) => {
@@ -673,18 +707,141 @@ function App() {
     </>
   )
 
-  const renderAdminSidebar = () => (
-    <>
-      <h2>Admin panel: manage rooms</h2>
+  const renderAdminNavigation = () => (
+    <nav className="admin-nav">
+      {adminPageConfig.map((page) => (
+        <button
+          key={page.id}
+          type="button"
+          className={adminPage === page.id ? 'active' : ''}
+          onClick={() => goToAdminPage(page.id)}
+        >
+          {page.label}
+        </button>
+      ))}
+      <button type="button" onClick={returnToListing}>
+        Public listing
+      </button>
+    </nav>
+  )
+
+  const renderAdminOverviewPage = () => (
+    <section className="admin-page">
+      <h2>Admin overview</h2>
+      {!analytics && <p>Loading analytics...</p>}
       {analytics && (
-        <div className="admin-kpis">
-          <p>Properties: {analytics.total_properties}</p>
-          <p>Bookings: {analytics.total_bookings}</p>
-          <p>Revenue: ${analytics.confirmed_revenue}</p>
-          <p>Active guests: {analytics.active_guests}</p>
-        </div>
+        <>
+          <div className="admin-kpis admin-kpis-wide">
+            <p>Properties: {analytics.total_properties}</p>
+            <p>Bookings: {analytics.total_bookings}</p>
+            <p>Revenue: ${analytics.confirmed_revenue}</p>
+            <p>Active guests: {analytics.active_guests}</p>
+          </div>
+          <h3>Top booked properties</h3>
+          <ul className="compact-list">
+            {analytics.top_properties?.map((item) => (
+              <li key={item.id}>
+                {item.title} ({item.bookings_count} bookings)
+              </li>
+            ))}
+          </ul>
+        </>
       )}
-      <form onSubmit={submitProperty} className="booking-form">
+    </section>
+  )
+
+  const renderAdminPropertiesPage = () => (
+    <section className="admin-page">
+      <div className="admin-page-header">
+        <h2>Manage properties</h2>
+        <button type="button" onClick={() => {
+          resetAdminForm()
+          goToAdminPage('editor')
+        }}
+        >
+          Create new room
+        </button>
+      </div>
+      <div className="search-bar admin-search-bar">
+        <input
+          placeholder="Where are you going?"
+          value={filters.location}
+          onChange={(e) => setFilters((prev) => ({ ...prev, location: e.target.value }))}
+        />
+        <input
+          type="number"
+          min="1"
+          value={filters.guests}
+          onChange={(e) => setFilters((prev) => ({ ...prev, guests: e.target.value }))}
+          placeholder="Guests"
+        />
+        <input
+          type="number"
+          min="0"
+          value={filters.min_price}
+          onChange={(e) => setFilters((prev) => ({ ...prev, min_price: e.target.value }))}
+          placeholder="Min $"
+        />
+        <input
+          type="number"
+          min="0"
+          value={filters.max_price}
+          onChange={(e) => setFilters((prev) => ({ ...prev, max_price: e.target.value }))}
+          placeholder="Max $"
+        />
+      </div>
+      <div className="results admin-results">
+        {properties.map((property) => (
+          <article
+            key={property.id}
+            className="card"
+            onClick={() => openRoomDetails(property.id)}
+          >
+            <img src={property.image_url} alt={property.title} />
+            <div className="card-body">
+              <h3>{property.title}</h3>
+              <p className="meta">
+                {property.type} - {property.location}
+              </p>
+              <p>{property.description}</p>
+              <div className="row">
+                <span>{'★'.repeat(property.stars)}</span>
+                <strong>${property.price_per_night}/night</strong>
+              </div>
+              <small>
+                Rating {property.rating} ({property.reviews_count} reviews)
+              </small>
+              <div className="admin-actions">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    startEditProperty(property)
+                    goToAdminPage('editor')
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  className="danger"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    deleteProperty(property.id)
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+
+  const renderAdminEditorPage = () => (
+    <section className="admin-page">
+      <h2>{editingPropertyId ? 'Update room' : 'Create room'}</h2>
+      <form onSubmit={submitProperty} className="booking-form admin-form">
         <input
           required
           placeholder="Title"
@@ -839,7 +996,7 @@ function App() {
         )}
       </form>
       {editingPropertyId && (
-        <div className="booking-form">
+        <div className="booking-form admin-form">
           <input
             type="file"
             accept="image/*"
@@ -855,19 +1012,35 @@ function App() {
           </button>
         </div>
       )}
-      {analytics?.top_properties?.length > 0 && (
-        <>
-          <h3>Top booked properties</h3>
-          <ul className="compact-list">
-            {analytics.top_properties.map((item) => (
-              <li key={item.id}>
-                {item.title} ({item.bookings_count} bookings)
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-    </>
+    </section>
+  )
+
+  const renderAdminPortalPage = () => (
+    <div className="page">
+      <header className="hero">
+        <div className="hero-content">
+          <p className="eyebrow">Admin workspace</p>
+          <h1>Admin panel</h1>
+          <p className="subtitle">
+            Use navigation tabs to view analytics, manage properties, and edit room details.
+          </p>
+          <div className="top-actions">
+            <span>
+              Signed in as {user?.name} ({user?.role})
+            </span>
+            <button onClick={handleLogout}>Logout</button>
+          </div>
+          {renderAdminNavigation()}
+        </div>
+      </header>
+
+      <main className="admin-layout">
+        {adminPage === 'overview' && renderAdminOverviewPage()}
+        {adminPage === 'properties' && renderAdminPropertiesPage()}
+        {adminPage === 'editor' && renderAdminEditorPage()}
+        {renderGlobalStatus()}
+      </main>
+    </div>
   )
 
   const renderGlobalStatus = () => (
@@ -1059,12 +1232,24 @@ function App() {
               </>
             )}
 
-            {user?.role === 'admin' && renderAdminSidebar()}
+            {user?.role === 'admin' && (
+              <section className="admin-sidebar-note">
+                <h2>Admin navigation</h2>
+                <p>Admin tools were moved to dedicated pages in the top navigation bar.</p>
+                <button type="button" onClick={() => goToAdminPage('overview')}>
+                  Open admin panel
+                </button>
+              </section>
+            )}
             {renderGlobalStatus()}
           </aside>
         </main>
       </div>
     )
+  }
+
+  if (adminPage && user?.role === 'admin') {
+    return renderAdminPortalPage()
   }
 
   if (activeRoomId) {
@@ -1195,7 +1380,15 @@ function App() {
         <aside className="sidebar">
           {!user && renderAuthForm()}
           {user?.role === 'guest' && renderGuestDashboard()}
-          {user?.role === 'admin' && renderAdminSidebar()}
+          {user?.role === 'admin' && (
+            <section className="admin-sidebar-note">
+              <h2>Admin navigation</h2>
+              <p>Use the dedicated admin pages from the top navigation bar.</p>
+              <button type="button" onClick={() => goToAdminPage('overview')}>
+                Open admin panel
+              </button>
+            </section>
+          )}
           {renderGlobalStatus()}
         </aside>
       </main>
