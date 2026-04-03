@@ -65,6 +65,11 @@ const formatStayDate = (value) => {
   return String(value).split('T')[0]
 }
 
+const handlePropertyImageError = (event) => {
+  if (event.currentTarget.src.endsWith('/stay-placeholder.svg')) return
+  event.currentTarget.src = '/stay-placeholder.svg'
+}
+
 function App() {
   const [authMode, setAuthMode] = useState('login')
   const [authForm, setAuthForm] = useState({ name: '', email: '', password: '' })
@@ -797,7 +802,11 @@ function App() {
             className="card"
             onClick={() => openRoomDetails(property.id)}
           >
-            <img src={property.image_url} alt={property.title} />
+            <img
+              src={property.image_url}
+              alt={property.title}
+              onError={handlePropertyImageError}
+            />
             <div className="card-body">
               <h3>{property.title}</h3>
               <p className="meta">
@@ -1092,7 +1101,11 @@ function App() {
 
             {roomDetails && (
               <article className="room-detail-card">
-                <img src={roomDetails.image_url} alt={roomDetails.title} />
+                <img
+                  src={roomDetails.image_url}
+                  alt={roomDetails.title}
+                  onError={handlePropertyImageError}
+                />
                 <div className="room-detail-content">
                   <h2>{roomDetails.title}</h2>
                   <p className="meta">
@@ -1322,7 +1335,11 @@ function App() {
               className="card"
               onClick={() => openRoomDetails(property.id)}
             >
-              <img src={property.image_url} alt={property.title} />
+              <img
+                src={property.image_url}
+                alt={property.title}
+                onError={handlePropertyImageError}
+              />
               <div className="card-body">
                 <h3>{property.title}</h3>
                 <p className="meta">
