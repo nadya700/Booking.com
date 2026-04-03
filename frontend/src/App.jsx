@@ -610,101 +610,146 @@ function App() {
 
   const renderSearchControls = (className = 'search-bar') => (
     <div className={className}>
-      <input
-        className="search-location"
-        placeholder="Where are you going?"
-        value={filters.location}
-        onChange={(e) => setFilters((prev) => ({ ...prev, location: e.target.value }))}
-      />
-      <input
-        type="number"
-        min="1"
-        value={filters.guests}
-        onChange={(e) => setFilters((prev) => ({ ...prev, guests: e.target.value }))}
-        placeholder="Guests"
-      />
-      <input
-        type="number"
-        min="0"
-        value={filters.min_price}
-        onChange={(e) => setFilters((prev) => ({ ...prev, min_price: e.target.value }))}
-        placeholder="Min $"
-      />
-      <input
-        type="number"
-        min="0"
-        value={filters.max_price}
-        onChange={(e) => setFilters((prev) => ({ ...prev, max_price: e.target.value }))}
-        placeholder="Max $"
-      />
-      <select
-        value={filters.type}
-        onChange={(e) => setFilters((prev) => ({ ...prev, type: e.target.value }))}
-      >
-        <option value="">Any property type</option>
-        <option value="Hotel">Hotel</option>
-        <option value="Airbnb">Airbnb</option>
-      </select>
-      <select
-        value={filters.min_rating}
-        onChange={(e) => setFilters((prev) => ({ ...prev, min_rating: e.target.value }))}
-      >
-        <option value="">Any rating</option>
-        <option value="9">9.0+</option>
-        <option value="8">8.0+</option>
-        <option value="7">7.0+</option>
-      </select>
-      <select
-        value={filters.free_cancellation}
-        onChange={(e) => setFilters((prev) => ({ ...prev, free_cancellation: e.target.value }))}
-      >
-        <option value="any">Any cancellation policy</option>
-        <option value="1">Free cancellation</option>
-        <option value="0">Non-refundable</option>
-      </select>
-      <select
-        value={filters.breakfast_included}
-        onChange={(e) => setFilters((prev) => ({ ...prev, breakfast_included: e.target.value }))}
-      >
-        <option value="any">Breakfast: any</option>
-        <option value="1">Breakfast included</option>
-        <option value="0">Breakfast not included</option>
-      </select>
-      <select
-        value={filters.pet_friendly}
-        onChange={(e) => setFilters((prev) => ({ ...prev, pet_friendly: e.target.value }))}
-      >
-        <option value="any">Pets: any</option>
-        <option value="1">Pet friendly</option>
-        <option value="0">Not pet friendly</option>
-      </select>
-      <select
-        value={filters.wifi_included}
-        onChange={(e) => setFilters((prev) => ({ ...prev, wifi_included: e.target.value }))}
-      >
-        <option value="any">Wi-Fi: any</option>
-        <option value="1">Wi-Fi included</option>
-        <option value="0">Wi-Fi not included</option>
-      </select>
-      <select
-        value={filters.parking_included}
-        onChange={(e) => setFilters((prev) => ({ ...prev, parking_included: e.target.value }))}
-      >
-        <option value="any">Parking: any</option>
-        <option value="1">Parking included</option>
-        <option value="0">No parking</option>
-      </select>
-      <select
-        className="search-sort"
-        value={filters.sort}
-        onChange={(e) => setFilters((prev) => ({ ...prev, sort: e.target.value }))}
-      >
-        <option value="rating_desc">Sort: Top rated</option>
-        <option value="most_booked">Sort: Most booked</option>
-        <option value="price_asc">Sort: Price low to high</option>
-        <option value="price_desc">Sort: Price high to low</option>
-        <option value="rating_asc">Sort: Rating low to high</option>
-      </select>
+      <label className="filter-field search-location">
+        <span className="filter-hint">Location</span>
+        <input
+          placeholder="City or destination"
+          value={filters.location}
+          onChange={(e) => setFilters((prev) => ({ ...prev, location: e.target.value }))}
+        />
+      </label>
+
+      <label className="filter-field">
+        <span className="filter-hint">Guests</span>
+        <input
+          type="number"
+          min="1"
+          value={filters.guests}
+          onChange={(e) => setFilters((prev) => ({ ...prev, guests: e.target.value }))}
+          placeholder="Guests"
+        />
+      </label>
+
+      <label className="filter-field">
+        <span className="filter-hint">Min price</span>
+        <input
+          type="number"
+          min="0"
+          value={filters.min_price}
+          onChange={(e) => setFilters((prev) => ({ ...prev, min_price: e.target.value }))}
+          placeholder="Min $"
+        />
+      </label>
+
+      <label className="filter-field">
+        <span className="filter-hint">Max price</span>
+        <input
+          type="number"
+          min="0"
+          value={filters.max_price}
+          onChange={(e) => setFilters((prev) => ({ ...prev, max_price: e.target.value }))}
+          placeholder="Max $"
+        />
+      </label>
+
+      <label className="filter-field">
+        <span className="filter-hint">Type</span>
+        <select
+          value={filters.type}
+          onChange={(e) => setFilters((prev) => ({ ...prev, type: e.target.value }))}
+        >
+          <option value="">Any</option>
+          <option value="Hotel">Hotel</option>
+          <option value="Airbnb">Airbnb</option>
+        </select>
+      </label>
+
+      <label className="filter-field">
+        <span className="filter-hint">Rating</span>
+        <select
+          value={filters.min_rating}
+          onChange={(e) => setFilters((prev) => ({ ...prev, min_rating: e.target.value }))}
+        >
+          <option value="">Any</option>
+          <option value="9">9.0+</option>
+          <option value="8">8.0+</option>
+          <option value="7">7.0+</option>
+        </select>
+      </label>
+
+      <label className="filter-field">
+        <span className="filter-hint">Cancellation</span>
+        <select
+          value={filters.free_cancellation}
+          onChange={(e) => setFilters((prev) => ({ ...prev, free_cancellation: e.target.value }))}
+        >
+          <option value="any">Any</option>
+          <option value="1">Free</option>
+          <option value="0">Non-refundable</option>
+        </select>
+      </label>
+
+      <label className="filter-field">
+        <span className="filter-hint">Breakfast</span>
+        <select
+          value={filters.breakfast_included}
+          onChange={(e) => setFilters((prev) => ({ ...prev, breakfast_included: e.target.value }))}
+        >
+          <option value="any">Any</option>
+          <option value="1">Included</option>
+          <option value="0">Not included</option>
+        </select>
+      </label>
+
+      <label className="filter-field">
+        <span className="filter-hint">Pets</span>
+        <select
+          value={filters.pet_friendly}
+          onChange={(e) => setFilters((prev) => ({ ...prev, pet_friendly: e.target.value }))}
+        >
+          <option value="any">Any</option>
+          <option value="1">Allowed</option>
+          <option value="0">Not allowed</option>
+        </select>
+      </label>
+
+      <label className="filter-field">
+        <span className="filter-hint">Wi-Fi</span>
+        <select
+          value={filters.wifi_included}
+          onChange={(e) => setFilters((prev) => ({ ...prev, wifi_included: e.target.value }))}
+        >
+          <option value="any">Any</option>
+          <option value="1">Included</option>
+          <option value="0">Not included</option>
+        </select>
+      </label>
+
+      <label className="filter-field">
+        <span className="filter-hint">Parking</span>
+        <select
+          value={filters.parking_included}
+          onChange={(e) => setFilters((prev) => ({ ...prev, parking_included: e.target.value }))}
+        >
+          <option value="any">Any</option>
+          <option value="1">Included</option>
+          <option value="0">Not included</option>
+        </select>
+      </label>
+
+      <label className="filter-field search-sort">
+        <span className="filter-hint">Order</span>
+        <select
+          value={filters.sort}
+          onChange={(e) => setFilters((prev) => ({ ...prev, sort: e.target.value }))}
+        >
+          <option value="rating_desc">Top rated</option>
+          <option value="most_booked">Most booked</option>
+          <option value="price_asc">Price low to high</option>
+          <option value="price_desc">Price high to low</option>
+          <option value="rating_asc">Rating low to high</option>
+        </select>
+      </label>
     </div>
   )
 
