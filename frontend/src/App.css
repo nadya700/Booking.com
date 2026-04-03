@@ -69,11 +69,12 @@
   border-radius: 12px;
   padding: 0.75rem;
   display: grid;
-  grid-template-columns: 2fr repeat(3, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.5rem;
 }
 
 .search-bar input,
+.search-bar select,
 .booking-form input,
 .booking-form select,
 .booking-form textarea,
@@ -82,6 +83,11 @@
   border-radius: 8px;
   padding: 0.65rem 0.75rem;
   font-size: 0.95rem;
+}
+
+.search-bar .search-location,
+.search-bar .search-sort {
+  grid-column: span 2;
 }
 
 .layout {
@@ -475,6 +481,11 @@
 
   .search-bar {
     grid-template-columns: 1fr;
+  }
+
+  .search-bar .search-location,
+  .search-bar .search-sort {
+    grid-column: span 1;
   }
 
   .admin-nav {

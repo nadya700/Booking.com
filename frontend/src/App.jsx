@@ -97,6 +97,14 @@ function App() {
     guests: 2,
     min_price: '',
     max_price: '',
+    type: '',
+    min_rating: '',
+    free_cancellation: 'any',
+    breakfast_included: 'any',
+    pet_friendly: 'any',
+    wifi_included: 'any',
+    parking_included: 'any',
+    sort: 'rating_desc',
   })
   const [bookingForm, setBookingForm] = useState({
     guest_name: '',
@@ -154,8 +162,9 @@ function App() {
   const queryString = useMemo(() => {
     const params = new URLSearchParams()
     Object.entries(filters).forEach(([key, value]) => {
-      if (String(value).trim() !== '') {
-        params.set(key, value)
+      const normalizedValue = String(value).trim()
+      if (normalizedValue !== '' && normalizedValue !== 'any') {
+        params.set(key, normalizedValue)
       }
     })
     return params.toString()
@@ -322,7 +331,7 @@ function App() {
         const payload = await apiRequest('/api/admin/analytics')
         setAnalytics(payload)
       } catch {
-        // keep UI responsive even if analytics temporarily fails
+        setAnalytics(null)
       }
     }
 
@@ -427,7 +436,7 @@ function App() {
         localStorage.setItem('token', nextToken)
         setToken(nextToken)
       } else {
-        // Allow session/cookie based auth responses that don't return explicit API tokens.
+
         localStorage.removeItem('token')
         setToken('')
       }
@@ -438,7 +447,7 @@ function App() {
         || payload?.data?.profile
         || null
 
-      // Some responses may include token first and user profile arrives via /api/me.
+
       if (!nextUser) {
         const meResponse = await fetch('/api/me', {
           credentials: 'include',
@@ -467,7 +476,7 @@ function App() {
         )
       }
 
-      // Do not fail login UI if profile resolution is delayed.
+
       if (nextUser) {
         setUser(nextUser)
         setSuccess(`Welcome, ${nextUser.name || nextUser.email || 'User'}`)
@@ -598,6 +607,106 @@ function App() {
       setError(requestError.message)
     }
   }
+
+  const renderSearchControls = (className = 'search-bar') => (
+    <div className={className}>
+      <input
+        className="search-location"
+        placeholder="Where are you going?"
+        value={filters.location}
+        onChange={(e) => setFilters((prev) => ({ ...prev, location: e.target.value }))}
+      />
+      <input
+        type="number"
+        min="1"
+        value={filters.guests}
+        onChange={(e) => setFilters((prev) => ({ ...prev, guests: e.target.value }))}
+        placeholder="Guests"
+      />
+      <input
+        type="number"
+        min="0"
+        value={filters.min_price}
+        onChange={(e) => setFilters((prev) => ({ ...prev, min_price: e.target.value }))}
+        placeholder="Min $"
+      />
+      <input
+        type="number"
+        min="0"
+        value={filters.max_price}
+        onChange={(e) => setFilters((prev) => ({ ...prev, max_price: e.target.value }))}
+        placeholder="Max $"
+      />
+      <select
+        value={filters.type}
+        onChange={(e) => setFilters((prev) => ({ ...prev, type: e.target.value }))}
+      >
+        <option value="">Any property type</option>
+        <option value="Hotel">Hotel</option>
+        <option value="Airbnb">Airbnb</option>
+      </select>
+      <select
+        value={filters.min_rating}
+        onChange={(e) => setFilters((prev) => ({ ...prev, min_rating: e.target.value }))}
+      >
+        <option value="">Any rating</option>
+        <option value="9">9.0+</option>
+        <option value="8">8.0+</option>
+        <option value="7">7.0+</option>
+      </select>
+      <select
+        value={filters.free_cancellation}
+        onChange={(e) => setFilters((prev) => ({ ...prev, free_cancellation: e.target.value }))}
+      >
+        <option value="any">Any cancellation policy</option>
+        <option value="1">Free cancellation</option>
+        <option value="0">Non-refundable</option>
+      </select>
+      <select
+        value={filters.breakfast_included}
+        onChange={(e) => setFilters((prev) => ({ ...prev, breakfast_included: e.target.value }))}
+      >
+        <option value="any">Breakfast: any</option>
+        <option value="1">Breakfast included</option>
+        <option value="0">Breakfast not included</option>
+      </select>
+      <select
+        value={filters.pet_friendly}
+        onChange={(e) => setFilters((prev) => ({ ...prev, pet_friendly: e.target.value }))}
+      >
+        <option value="any">Pets: any</option>
+        <option value="1">Pet friendly</option>
+        <option value="0">Not pet friendly</option>
+      </select>
+      <select
+        value={filters.wifi_included}
+        onChange={(e) => setFilters((prev) => ({ ...prev, wifi_included: e.target.value }))}
+      >
+        <option value="any">Wi-Fi: any</option>
+        <option value="1">Wi-Fi included</option>
+        <option value="0">Wi-Fi not included</option>
+      </select>
+      <select
+        value={filters.parking_included}
+        onChange={(e) => setFilters((prev) => ({ ...prev, parking_included: e.target.value }))}
+      >
+        <option value="any">Parking: any</option>
+        <option value="1">Parking included</option>
+        <option value="0">No parking</option>
+      </select>
+      <select
+        className="search-sort"
+        value={filters.sort}
+        onChange={(e) => setFilters((prev) => ({ ...prev, sort: e.target.value }))}
+      >
+        <option value="rating_desc">Sort: Top rated</option>
+        <option value="most_booked">Sort: Most booked</option>
+        <option value="price_asc">Sort: Price low to high</option>
+        <option value="price_desc">Sort: Price high to low</option>
+        <option value="rating_asc">Sort: Rating low to high</option>
+      </select>
+    </div>
+  )
 
   const renderAuthForm = () => (
     <>
@@ -767,34 +876,7 @@ function App() {
           Create new room
         </button>
       </div>
-      <div className="search-bar admin-search-bar">
-        <input
-          placeholder="Where are you going?"
-          value={filters.location}
-          onChange={(e) => setFilters((prev) => ({ ...prev, location: e.target.value }))}
-        />
-        <input
-          type="number"
-          min="1"
-          value={filters.guests}
-          onChange={(e) => setFilters((prev) => ({ ...prev, guests: e.target.value }))}
-          placeholder="Guests"
-        />
-        <input
-          type="number"
-          min="0"
-          value={filters.min_price}
-          onChange={(e) => setFilters((prev) => ({ ...prev, min_price: e.target.value }))}
-          placeholder="Min $"
-        />
-        <input
-          type="number"
-          min="0"
-          value={filters.max_price}
-          onChange={(e) => setFilters((prev) => ({ ...prev, max_price: e.target.value }))}
-          placeholder="Max $"
-        />
-      </div>
+      {renderSearchControls('search-bar admin-search-bar')}
       <div className="results admin-results">
         {properties.map((property) => (
           <article
@@ -1289,34 +1371,7 @@ function App() {
             {user && <button onClick={handleLogout}>Logout</button>}
           </div>
 
-          <div className="search-bar">
-            <input
-              placeholder="Where are you going?"
-              value={filters.location}
-              onChange={(e) => setFilters((prev) => ({ ...prev, location: e.target.value }))}
-            />
-            <input
-              type="number"
-              min="1"
-              value={filters.guests}
-              onChange={(e) => setFilters((prev) => ({ ...prev, guests: e.target.value }))}
-              placeholder="Guests"
-            />
-            <input
-              type="number"
-              min="0"
-              value={filters.min_price}
-              onChange={(e) => setFilters((prev) => ({ ...prev, min_price: e.target.value }))}
-              placeholder="Min $"
-            />
-            <input
-              type="number"
-              min="0"
-              value={filters.max_price}
-              onChange={(e) => setFilters((prev) => ({ ...prev, max_price: e.target.value }))}
-              placeholder="Max $"
-            />
-          </div>
+          {renderSearchControls()}
         </div>
       </header>
 

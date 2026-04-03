@@ -17,6 +17,10 @@ class PropertyController extends Controller
             $query->where('location', 'like', '%'.$request->string('location')->toString().'%');
         }
 
+        if ($request->filled('type')) {
+            $query->where('type', $request->string('type')->toString());
+        }
+
         if ($request->filled('min_price')) {
             $query->where('price_per_night', '>=', (int) $request->input('min_price'));
         }
@@ -29,9 +33,60 @@ class PropertyController extends Controller
             $query->where('max_guests', '>=', (int) $request->input('guests'));
         }
 
-        return response()->json(
-            $query->orderByDesc('rating')->orderBy('price_per_night')->get()
-        );
+        if ($request->filled('min_rating')) {
+            $query->where('rating', '>=', (float) $request->input('min_rating'));
+        }
+
+        foreach ([
+            'free_cancellation',
+            'breakfast_included',
+            'pet_friendly',
+            'wifi_included',
+            'parking_included',
+        ] as $booleanField) {
+            if (! $request->has($booleanField)) {
+                continue;
+            }
+
+            $rawValue = strtolower((string) $request->input($booleanField));
+            if (in_array($rawValue, ['1', 'true', 'yes'], true)) {
+                $query->where($booleanField, true);
+            } elseif (in_array($rawValue, ['0', 'false', 'no'], true)) {
+                $query->where($booleanField, false);
+            }
+        }
+
+        $sort = $request->string('sort')->toString();
+        switch ($sort) {
+            case 'most_booked':
+                $query
+                    ->withCount(['bookings as bookings_count' => function ($bookingQuery) {
+                        $bookingQuery->where('status', '!=', 'cancelled');
+                    }])
+                    ->orderByDesc('bookings_count')
+                    ->orderByDesc('rating')
+                    ->orderBy('price_per_night');
+                break;
+
+            case 'price_asc':
+                $query->orderBy('price_per_night')->orderByDesc('rating');
+                break;
+
+            case 'price_desc':
+                $query->orderByDesc('price_per_night')->orderByDesc('rating');
+                break;
+
+            case 'rating_asc':
+                $query->orderBy('rating')->orderBy('price_per_night');
+                break;
+
+            case 'rating_desc':
+            default:
+                $query->orderByDesc('rating')->orderBy('price_per_night');
+                break;
+        }
+
+        return response()->json($query->get());
     }
 
     public function show(Property $property)
